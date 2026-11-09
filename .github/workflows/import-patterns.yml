@@ -19,7 +19,7 @@ jobs:
       - name: Download pages
         run: |
           set -e
-          get() { mkdir -p "$1"; curl -fsSL -o "$1/index.html" "$2"; s=$(wc -c < "$1/index.html"); echo "$1 $s bytes"; test "$s" -gt 100000; grep -q 'id="root"' "$1/index.html"; }
+          get() { mkdir -p "$1"; curl -fsSL -o "$1/index.html" "$2"; s=$(wc -c < "$1/index.html"); echo "$1 $s bytes"; test "$s" -gt 100000; grep -Eq 'id="?root' "$1/index.html"; }
           get editorial "https://sg.migoo.ai/beeai/api/v1/media/signed/budee/2026/11/09/bfce3979.html?expires=1794212005&sig=88dbfe0b958cb5e5fb4372a398e627a69b9cb83da4a4ff74d8b6c69c2ae6ed96"
           get luxury "https://sg.migoo.ai/beeai/api/v1/media/signed/budee/2026/11/09/57fc0a2b.html?expires=1794212006&sig=881ee0ac6304716afadda044ddf99d81feaae527f455f26272b36adfd0c9f323"
           get kinetic "https://sg.migoo.ai/beeai/api/v1/media/signed/budee/2026/11/09/6435fd30.html?expires=1794212006&sig=bbc4b374720c0932889f83175e88251584002d5dcea3e674af88c01dbb5fa5b5"
