@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EPIC DAY — ベントーグリッド＋つぶつぶ球体</title>
+<style>
+html,body{margin:0;height:100%;overflow:hidden;background:#0a0a0a}
+#frame{position:fixed;inset:0;width:100%;height:100%;border:0}
+#sphere{position:fixed;right:3vw;bottom:5vh;width:min(38vw,360px);aspect-ratio:1/1;z-index:50;cursor:grab;touch-action:none;filter:drop-shadow(0 0 18px rgba(245,197,24,.5))}
+@media(max-width:640px){#sphere{right:50%;transform:translateX(50%);bottom:3vh;width:52vw}}
+@media(prefers-reduced-motion:reduce){#sphere{display:none}}
+</style>
+</head>
+<body>
+<iframe id="frame" src="../bento/" title="EPIC DAY ベントーグリッド"></iframe>
+<canvas id="sphere" data-fx="sphere" data-count="520" role="img" aria-label="回転する点の球体"></canvas>
+<script>
+(function(){
+  var project=function(p,ay,ax,size,cx,cy){var x=p.x,y=p.y,z=p.z,t;t=x*Math.cos(ay)-z*Math.sin(ay);z=x*Math.sin(ay)+z*Math.cos(ay);x=t;t=y*Math.cos(ax)-z*Math.sin(ax);z=y*Math.sin(ax)+z*Math.cos(ax);y=t;var k=3/(3+z);return{x:cx+x*size*k,y:cy+y*size*k,z:z,k:k};};
+  var cv=document.getElementById('sphere');var ctx=cv.getContext('2d');
+  var n=+cv.dataset.count||520;var golden=Math.PI*(3-Math.sqrt(5));var pts=[];
+  for(var i=0;i<n;i++){var y=1-(i/(n-1))*2;var r=Math.sqrt(Math.max(0,1-y*y));var t=golden*i;pts.push({x:Math.cos(t)*r,y:y,z:Math.sin(t)*r,h:(i/n)*360});}
+  var state={ay:0,ax:-0.3,vy:0.008,vx:0};var last=null;
+  cv.addEventListener('pointerdown',function(e){last={x:e.clientX,y:e.clientY};cv.setPointerCapture(e.pointerId);});
+  cv.addEventListener('pointermove',function(e){if(!last)return;state.vy=(e.clientX-last.x)*0.01;state.vx=(e.clientY-last.y)*0.01;last={x:e.clientX,y:e.clientY};});
+  var up=function(){last=null;};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+  var W=1,H=1;
+  function resize(){var d=window.devicePixelRatio||1;W=cv.clientWidth||300;H=cv.clientHeight||300;cv.width=W*d;cv.height=H*d;ctx.setTransform(d,0,0,d,0,0);}
+  resize();window.addEventListener('resize',resize);
+  (function loop(){
+    state.ay+=state.vy;state.ax+=state.vx;state.vy+=(0.008-state.vy)*0.02;state.vx*=0.95;
+    ctx.clearRect(0,0,W,H);
+    pts.map(function(p){var q=project(p,state.ay,state.ax,Math.min(W,H)*0.40,W/2,H/2);q.h=p.h;return q;})
+      .sort(function(a,b){return b.z-a.z;})
+      .forEach(function(p){ctx.globalAlpha=0.25+(1-(p.z+1)/2)*0.75;var hue=45+(p.h/360)*40;ctx.fillStyle='hsl('+hue.toFixed(0)+' 96% 62%)';ctx.beginPath();ctx.arc(p.x,p.y,2.7*p.k,0,Math.PI*2);ctx.fill();});
+    ctx.globalAlpha=1;requestAnimationFrame(loop);
+  })();
+})();
+</script>
+</body>
+</html>
